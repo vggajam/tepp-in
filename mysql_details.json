@@ -1,0 +1,7 @@
+{
+    "host":"localhost",
+    "port":3315,
+    "user":"root",
+    "passwd":"nitw@1234",
+    "db":"train_enquiry_plus_plus"
+}

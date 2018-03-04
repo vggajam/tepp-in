@@ -1,0 +1,19 @@
+runtime: python27
+api_version: 1
+threadsafe: true
+
+# [START handlers]
+handlers:
+- url: /static
+  static_dir: static
+- url: /.*
+  script: main.app
+env_variables:
+  CLOUDSQL_CONNECTION_NAME: tepp-3-idiots:asia-south1:tepp-db
+  CLOUDSQL_USER: reader
+  CLOUDSQL_PASSWORD: 8331948680
+  CLOUDSQL_DB: tepp
+libraries:
+- name: MySQLdb
+  version: "latest"
+# [END handlers]
