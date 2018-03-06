@@ -16,19 +16,18 @@ def render_direct_trains_row(trains,src,dst,jdate):
 
 def render_one_stop_row(trains,src,dst,jdate):
     res = ''
-    for intr_key in trains:
-        for train_pair in trains[intr_key]:
-            # print(train_pair)
-            res += render_template('one_stop_row.html',
-                                    train_no1=train_pair[0]['train_no'],
-                                    src1=train_pair[0]['src'],
-                                    sdt1=train_pair[0]['sdt'],
-                                    dst1=train_pair[0]['dst'],
-                                    dat1=train_pair[0]['dat'],
-                                    train_no2=train_pair[1]['train_no'],
-                                    src2=train_pair[1]['src'],
-                                    sdt2=train_pair[1]['sdt'],
-                                    dst2=train_pair[1]['dst'],
-                                    dat2=train_pair[1]['dat'],
-                                    wt=train_pair['wt'])
+    for train_pair in trains:
+        # print(train_pair)
+        res += render_template('one_stop_row.html',
+                                train_no1=train_pair[0]['train_no'],
+                                src1=train_pair[0]['src'],
+                                sdt1=train_pair[0]['sdt'],
+                                dst1=train_pair[0]['dst'],
+                                dat1=train_pair[0]['dat'],
+                                train_no2=train_pair[1]['train_no'],
+                                src2=train_pair[1]['src'],
+                                sdt2=train_pair[1]['sdt'],
+                                dst2=train_pair[1]['dst'],
+                                dat2=train_pair[1]['dat'],
+                                wt=train_pair['wt'])
     return res

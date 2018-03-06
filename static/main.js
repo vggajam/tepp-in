@@ -1,41 +1,75 @@
 console.log('main.js is loading...')
-
-function alertContents() {
-	if (httpRequest.readyState === XMLHttpRequest.DONE) {
-		if (httpRequest.status === 200) {
-		// alert(httpRequest.responseText);
-			console.log('results are returned!'+httpRequest.responseText)
-			$('#results').html(httpRequest.responseText);
-		} else {
-			console.log('There was a problem with the request.');
-		}
-	}
-}
-function make_request(params){
-	httpRequest = new XMLHttpRequest();
-
-	if (!httpRequest) {
-		console.log('Giving up :( Cannot create an XMLHTTP instance');
-		return false;
-	}
-	httpRequest.onreadystatechange = alertContents;
-	httpRequest.open('GET', 'get_paths.html?'+params);
-	httpRequest.send();
-	
-}
-function query_submit(){
-	$('#search').prop('disabled', true);
-	src = $('#src').val();
-	dst = $('#dst').val();
-	jdate = $('#date').val();
-	if(src.length == 0 || dst.length == 0 ||jdate.length == 0){
+var seat_cache={}
+function reg_submit() {
+        $('#reg').prop('disabled', true);
+	src_val = $('#src').val();
+	dst_val = $('#dst').val();
+        jdate_val = $('#date').val();
+        cls_val = $('#cls').val();
+        mobile_no = $('#tel').val();
+	if(src_val.length == 0 || dst_val.length == 0 || jdate_val.length == 0 || mobile_no.length == 0){
 		window.alert('All fields are mandatory!!')
 	}
 	else{
-		params = "src="+src+"&dst="+dst+"&jdate="+jdate
-		make_request(params)
+		params = {src:src_val, dst:dst_val, jdate:jdate_val, cls:cls_val, mobile:mobile_no}
+		$.get('reg_submit',params);
+        }
+        $('#reg').innerHTML = "Registered";
+}
+function callback_seat(data) {
+	resp = JSON.parse(data)
+	console.log(resp)
+	if(seat_cache[resp["key"]] === undefined)
+		seat_cache[resp["key"]] = resp["seat"]
+	var i = parseInt(resp["rowid"]);
+	console.log(i);
+	$('.seat')[i].innerHTML = seat_cache[resp["key"]]
+}
+function get_avails(){
+        console.log('get_avail called');
+        seat_cache = {}
+        var train_nos = $('.train_no');
+        var srcs = $('.src');
+        var dsts = $('.dst');
+        var sdts = $('.sdt');
+        var seats = $('.seat');
+        var cls_val = $('.class_code')[0];
+        for (var i=0; i<train_nos.length;i++){
+		sdate = sdts[i].innerHTML.toString().split(' ')[0]
+                var key_val = train_nos[i].innerHTML+'_'+srcs[i].innerHTML+'_'+dsts[i].innerHTML+'_'+sdate+'_'+cls_val.innerHTML
+                if(seat_cache[key_val] == undefined){
+                        params = {rowid:i,key:key_val,train_no:train_nos[i].innerHTML,src:srcs[i].innerHTML,dst:dsts[i].innerHTML,sdt:sdts[i].innerHTML,clas:cls_val.innerHTML};
+                        console.log(params);
+                        $.get('/seat_check',params,callback_seat);
+		}
+                else{
+			console.log('already cached!!')
+			data = {rowid:i.toString(), key:key_val, seat:'CacheErr'}
+			callback_seat(JSON.stringify(data))
+		}
+        }
+        $('#search').prop('disabled',false);
+}
+function alertContents(response) {
+        console.log('results are returned!:'+response);
+        $('#results').html(response);
+        get_avails();
+}
+function query_submit(){
+	$('#search').prop('disabled', true);
+	src_val = $('#src').val();
+	dst_val = $('#dst').val();
+        jdate_val = $('#date').val();
+        cls_val = $('#cls').val();
+	if(src_val.length == 0 || dst_val.length == 0 || jdate_val.length == 0){
+		window.alert('All fields are mandatory!!')
+		$('#search').prop('disabled',false);
 	}
-	$('#search').prop('disabled',false);	
+	else{
+		params = {src:src_val, dst:dst_val, jdate:jdate_val, cls:cls_val}
+		$.get('get_paths',params,alertContents)
+	}
+	// $('#search').prop('disabled',false);	
 }
 window.onload=function(){
 	console.log('station_codes are loaded')
@@ -10423,12 +10457,12 @@ window.onload=function(){
 	]
 	$('#src').autocomplete({
 		 source:stations,
-		 minLength:3
+		 minLength:2
 	 });
 	
 	 $('#dst').autocomplete({
 		source:stations,
-		minLength:3
+		minLength:2
 	});
 	console.log("stations are loaded:"+stations.length);
 }

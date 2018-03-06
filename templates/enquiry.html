@@ -4,6 +4,7 @@
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>TEPP</title>
+    <link rel="shortcut icon" href="/static/train.ico"/>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" type="text/css" media="screen" href="static/main.css" />
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
@@ -11,38 +12,53 @@
 </head>
 <body>
     <header class="page-header text-center"><h1>Train Enquiry Plus Plus</h1></header>
+    
     <nav class="row">
-        <a href ="/enquiry.html">
-            <div class="btn panel col-sm-6 text-center">
+        <div class="btn active col-sm-6 text-center">
+            <a href ="/enquiry.html">
                 <h4>Train Enquiry</h4>
-            </div>
-        </a>
-        <a href ="/service.html">
-            <div class="btn panel col-sm-6  text-center">
+            </a>
+        </div>
+        
+        <div class="panel col-sm-6  text-center">
+            <a href ="/service.html">
                 <h4>Notification Service</h4>
-            </div>
-        </a>
-       
+            </a>
+        </div>
     </nav>
-    <div class="container row">
-        <div class="col-sm-3">
+    <form class="form-inline">
+        <div class="form-group">
         <label>Source:</label>
-        <input type="text" class="btn btn-default" name="src" id="src" placeholder="from station">
+        <input type="text" class="form-control" name="src" id="src" placeholder="from station">
         </div>
         
-        <div class="col-sm-4">
+        <div class="form-group">
         <label>Destination:</label>
-        <input type="text" class="btn btn-default" name="dst" id="dst" placeholder="to station">
-        </div>
-        
-        <div class="col-sm-3">
-        <label>Date:</label>
-        <input type="date" class="btn btn-default" name="date" id="date">
+        <input type="text" class="form-control" name="dst" id="dst" placeholder="to station">
         </div>
 
-        <button type="button" id="search" onclick="query_submit()" class="col-sm-2 btn btn-primary "><span class="glyphicon glyphicon-search"></span> Search</button>
-    </div>
-    <div id="results" class="container">
+        <div class="form-group">
+        <label >Class:</label>
+        <select class="form-control" id="cls">
+            <option>First Class AC-1A</option>
+            <option>AC 2-tier sleeper-2A</option>
+            <option>AC 3 Tier-3A</option>
+            <option>First class-FC</option>
+            <option>AC chair Car-CC</option>
+            <option>Sleeper Class-SL</option>
+            <option>Second Sitting-2S</option>
+        </select>
+        </div>
+        <div class="form-group">
+        <label>Date:</label>
+        <input type="date" class="form-control" name="date" id="date">
+        </div>
+
+        <div class="form-group">
+        <button type="button" id="search" onclick="query_submit()" class="btn btn-primary"><span class="glyphicon glyphicon-search"></span> Search</button>
+        </div>
+    </form>
+    <div id="results" class="container-fluid">
         <h1>Results appear here!!</h1>
     </div>
     <footer class="container row">
