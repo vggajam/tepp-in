@@ -3,7 +3,7 @@ import datetime as dt
 from flask import render_template
 
 
-def render_direct_trains_row(trains,src,dst,jdate):
+def render_direct_trains_row(trains):
     res = ''
     for train in trains:
         res += render_template('direct_train_row.html',
@@ -14,7 +14,7 @@ def render_direct_trains_row(trains,src,dst,jdate):
                                 dat = train['dat'])
     return res
 
-def render_one_stop_row(trains,src,dst,jdate):
+def render_one_stop_row(trains):
     res = ''
     for train_pair in trains:
         # print(train_pair)

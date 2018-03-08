@@ -1,20 +1,20 @@
 console.log('main.js is loading...')
 var seat_cache={}
 function reg_submit() {
-        $('#reg').prop('disabled', true);
-	src_val = $('#src').val();
-	dst_val = $('#dst').val();
-        jdate_val = $('#date').val();
-        cls_val = $('#cls').val();
-        mobile_no = $('#tel').val();
-	if(src_val.length == 0 || dst_val.length == 0 || jdate_val.length == 0 || mobile_no.length == 0){
-		window.alert('All fields are mandatory!!')
-	}
-	else{
-		params = {src:src_val, dst:dst_val, jdate:jdate_val, cls:cls_val, mobile:mobile_no}
-		$.get('reg_submit',params);
-        }
-        $('#reg').innerHTML = "Registered";
+//         $('#reg').prop('disabled', true);
+// 	src_val = $('#src').val();
+// 	dst_val = $('#dst').val();
+//         jdate_val = $('#date').val();
+//         cls_val = $('#cls').val();
+//         mobile_no = $('#tel').val();
+// 	if(src_val.length == 0 || dst_val.length == 0 || jdate_val.length == 0 || mobile_no.length == 0){
+// 		window.alert('All fields are mandatory!!')
+// 	}
+// 	else{
+// 		params = {src:src_val, dst:dst_val, jdate:jdate_val, cls:cls_val, mobile:mobile_no}
+// 		$.get('reg_submit',params);
+//         }
+//         $('#reg').innerHTML = "Registered";
 }
 function callback_seat(data) {
 	resp = JSON.parse(data)
@@ -34,7 +34,7 @@ function get_avails(){
         var sdts = $('.sdt');
         var seats = $('.seat');
         var cls_val = $('.class_code')[0];
-        for (var i=0; i<train_nos.length;i++){
+        for (var i=0; i<10;i++){
 		sdate = sdts[i].innerHTML.toString().split(' ')[0]
                 var key_val = train_nos[i].innerHTML+'_'+srcs[i].innerHTML+'_'+dsts[i].innerHTML+'_'+sdate+'_'+cls_val.innerHTML
                 if(seat_cache[key_val] == undefined){
@@ -53,6 +53,13 @@ function get_avails(){
 function alertContents(response) {
         console.log('results are returned!:'+response);
         $('#results').html(response);
+        $(document).ready( function () {
+                $('#direct_tbl').DataTable();
+            } );
+            $(document).ready( function () {
+                $('#one_stop_tbl').DataTable();
+            } );
+        
         get_avails();
 }
 function query_submit(){
@@ -71,8 +78,26 @@ function query_submit(){
 	}
 	// $('#search').prop('disabled',false);	
 }
+function waiting_filter(){
+        if ($('#wait_col').val()=='waiting'){
+                slt_hrs = 13;
+        }
+        else
+                slt_hrs = parseInt($('#wait_col').val().split(' ')[1]);
+        console.log(slt_hrs);
+        rows = $('.one_stop_row');
+        wts = $('.wt');
+        for(var i in rows){
+                cur_hrs = parseInt(wts[i].innerHTML.split(':')[0]);
+                console.log(cur_hrs);
+                if(cur_hrs >= slt_hrs)
+                        $(rows[i]).hide();
+                else
+                        $(rows[i]).show();
+        }
+}
 window.onload=function(){
-	console.log('station_codes are loaded')
+        console.log('station_codes are loaded')
 	var stations=['ATARIA-AA',
         'AMBIKA BHAWANI HALT-AABH',
         'AMB ANDAURA-AADR',

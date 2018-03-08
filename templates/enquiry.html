@@ -11,21 +11,33 @@
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
 </head>
 <body>
-    <header class="page-header text-center"><h1>Train Enquiry Plus Plus</h1></header>
+    <!-- <header class="page-header text-center"><h1>Train Enquiry Plus Plus</h1></header> -->
     
-    <nav class="row">
-        <div class="btn active col-sm-6 text-center">
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="/enquiry">TrainEnquiry++</a>
+            </div>
+            <ul class="nav navbar-nav">
+                <li class="active"><a href="#">Train Enquiry</a></li>
+                <li><a href="/service">Current Availablity</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- <nav class="row">
+        <div class="col-sm-6 text-center">
             <a href ="/enquiry.html">
                 <h4>Train Enquiry</h4>
             </a>
         </div>
         
-        <div class="panel col-sm-6  text-center">
+        <div class="col-sm-6  text-center">
             <a href ="/service.html">
                 <h4>Notification Service</h4>
             </a>
         </div>
-    </nav>
+    </nav> -->
     <form class="form-inline">
         <div class="form-group">
         <label>Source:</label>
@@ -67,7 +79,8 @@
         <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
         <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
         <script src="static/main.js"></script>
-    
+        <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.16/css/jquery.dataTables.css">
+        <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.js"></script>
     </footer>
 </body>
 </html>

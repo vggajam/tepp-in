@@ -10,11 +10,16 @@ import json
 # from curr_avbl import curr_avbl
 app = Flask(__name__)
 # https://api.railwayapi.com/v2/check-seat/train/12001/source/BPL/dest/NDLS/date/16-07-2017/pref/CC/quota/GN/apikey/myapikey/
-# db = connect_to_cloudsql()
-db = connect_local()
+# db = connect_local()
+db = connect_to_aws()
 
-apikey = '42turff2q0'
-@app.route('/enquiry.html')
+if __name__ == "__main__":
+    # Setting debug to True enables debug output. This line should be
+    # removed before deploying a production app.
+    app.debug = True
+    app.run()
+apikey = 'zhzygeldr2'
+@app.route('/enquiry')
 def enquiry():
     return render_template('enquiry.html')
 # @app.route('/favicon.ico')
@@ -25,7 +30,7 @@ def enquiry():
 def index():
     return redirect(url_for('enquiry'))
 
-@app.route('/service.html')
+@app.route('/service')
 def service():
     return render_template('service.html')
 
@@ -44,22 +49,13 @@ def service():
 
 @app.route('/seat_check',methods=['GET'])
 def return_seat_avail():
-    # print('here we go!')
-    # {train_no:train_nos[i],src:srcs[i],dst:dsts[i],sdt:dsts[i],clas:cls_val}
     params = request.args
-    # print(params)
-    # print(params['src'],params['dst'],params['train_no'])
-    # src = str(request.args.get('src',''))
-    # dst = str(request.args.get('dst',''))
-    # train_no = str(request.args.get('train_no',''))
     sdt = (str(request.args['sdt']).split(' ')[0]).split('-')
     if sdt[2][0] == '0':
         sdt[2] = sdt[2][1]
     if sdt[1][0] == '0':
         sdt[1] = sdt[1][1]
-    # clas = str(request.args.get('clas',''))
-    # rowid = str(request.args.get('rowid',''))
-    # print(params)
+
     resp = dict()
     resp['rowid'] = str(params['rowid'])
     resp['key'] = str(params['key'])
@@ -78,12 +74,12 @@ def get_paths_html():
     trains_details = get_paths(src,dst,jdate, db)# pylint: disable=E1601
     responce_html =''
     if 'direct' in trains_details:
-        results = render_direct_trains_row(trains_details['direct'],src,dst,jdate)
+        results = render_direct_trains_row(trains_details['direct'])
         # print(results)# pylint: disable=E1601
         responce_html+= str(open('./templates/direct_train_table.html').read()).replace('{{tbody}}',results).replace('{{cls}}',clas)
 
     if 'one_stop' in trains_details:
-        results = render_one_stop_row(trains_details['one_stop'],src, dst, jdate)
+        results = render_one_stop_row(trains_details['one_stop'])
         # print(results)# pylint: disable=E1601
         responce_html+=(str(open('./templates/one_stop_table.html').read()).replace('{{tbody}}',results).replace('{{cls}}',clas))
     print('resp',len(responce_html))
@@ -94,29 +90,3 @@ def server_error(e):
     logging.exception('An error occurred during a request.')
     return 'An internal error occurred.', 500
 
-# [END form]
-
-# @app.route('/station_list.js',methods=['GET'])
-# app.get('/station_list.js', function(req, res) {
-# 	res.render('station_list.js');
-# });
-# [START submitted]
-# @app.route('/submitted', methods=['POST'])
-# def submitted_form():
-#     name = request.form['name']
-#     email = request.form['email']
-#     site = request.form['site_url']
-#     comments = request.form['comments']
-
-#     # [END submitted]
-#     # [START render_template]
-#     return render_template(
-#         'submitted_form.html',
-#         name=name,
-#         email=email,
-#         site=site,
-#         comments=comments)
-#     # [END render_template]
-
-
-# [END app]

@@ -5,7 +5,6 @@ import requests
 
 from db_tools import inter_stns, trains_btw_with_times, weekdays
 
-
 fpass = ['51029','52963','52964','52973','52974','52975','52976','55337','55527','55528','56277','56278','56281','56282','56324','56921','56922','56925','56926','57625','57626','58433','58434','59204','59211','59212']
 class_codes = ['1A','2A','3A','FC','CC','SL','2S']
 def is_no_res(train_no):
@@ -111,6 +110,7 @@ def get_trains_pair(src, intr, dst, jdate, db):
         # #print(pair)
         result_list.append(dict(pair))
         # #print('')# pylint: disable=E1601
+    result_list = sorted(result_list , key= lambda pair: dt.datetime.strptime(pair[1]['dat'], "%Y-%m-%d %H:%M:%S"))
     return result_list
 
 def get_direct_trains(src, dst, jdate, db):
@@ -128,6 +128,8 @@ def get_direct_trains(src, dst, jdate, db):
         # #print(train[-3])
         json_pkt['dat'] = str(jdate+train[5]+dt.timedelta(days=train[-1]-train[-2])-dt.timedelta(days=(int(train[-3]<train[-4])if train[-3] !=dt.timedelta(0) else 0)))
         res.append(dict(json_pkt))
+    
+    res = sorted(res,key= lambda train: dt.datetime.strptime(train['dat'], "%Y-%m-%d %H:%M:%S"))
     return list(res)
 
 def get_paths(src, dst, jdate, db, OnlyDirect=False):
@@ -138,7 +140,7 @@ def get_paths(src, dst, jdate, db, OnlyDirect=False):
     direct_trains = get_direct_trains(src, dst, jdate, db)
     if direct_trains is not None and len(direct_trains) >0:
         result['direct'] = direct_trains
-    result['direct'] = sorted(result['direct'],key= lambda train: dt.datetime.strptime(train['dat'], "%Y-%m-%d %H:%M:%S"))
+    result['direct'] = result['direct'][:5]
     if OnlyDirect:
         return result
     
@@ -158,7 +160,7 @@ def get_paths(src, dst, jdate, db, OnlyDirect=False):
         if train_pairs is not None:
             result['one_stop'] += train_pairs
     #2018-03-05 11:40:00
-    result['one_stop'] = sorted(result['one_stop'], key= lambda pair: dt.datetime.strptime(pair[1]['dat'], "%Y-%m-%d %H:%M:%S"))
+    result['one_stop'] = result['one_stop'][:15]
     return result
 
 
