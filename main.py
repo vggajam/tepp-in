@@ -2,7 +2,7 @@
 import datetime as dt
 import logging
 from flask import Flask, redirect, render_template, request, url_for
-from db_tools import connect_to_aws,connect_local
+from db_tools import connect_to
 from rendering_lib import *
 from tepp import get_paths, seat_check
 import json
@@ -11,7 +11,8 @@ import json
 app = Flask(__name__)
 # https://api.railwayapi.com/v2/check-seat/train/12001/source/BPL/dest/NDLS/date/16-07-2017/pref/CC/quota/GN/apikey/myapikey/
 # db = connect_local()
-db = connect_to_aws()
+
+db = connect_to('./mysqlvm-details.json')
 
 if __name__ == "__main__":
     # Setting debug to True enables debug output. This line should be

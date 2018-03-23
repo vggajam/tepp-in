@@ -140,7 +140,7 @@ def get_paths(src, dst, jdate, db, OnlyDirect=False):
     direct_trains = get_direct_trains(src, dst, jdate, db)
     if direct_trains is not None and len(direct_trains) >0:
         result['direct'] = direct_trains
-    result['direct'] = result['direct'][:5]
+    result['direct'] = result['direct']
     if OnlyDirect:
         return result
     
@@ -160,7 +160,7 @@ def get_paths(src, dst, jdate, db, OnlyDirect=False):
         if train_pairs is not None:
             result['one_stop'] += train_pairs
     #2018-03-05 11:40:00
-    result['one_stop'] = result['one_stop'][:15]
+    result['one_stop'] = result['one_stop']
     return result
 
 
