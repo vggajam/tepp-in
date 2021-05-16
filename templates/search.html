@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+
+{% block headTitle %}
+Train Search
+{% endblock %}
+
+{% block title %}
+Train Search
+{% endblock %}
+
+
+{% block content %}
+
+<div class="page-content">
+    <form action="{{ url_for('search') }}" method="POST" class="flex-row-wrap-space-evenly">
+        <datalist id="stations">
+            {% for station_id, station_name in stations %}
+            <option value="{{station_id}}"> {{station_name}} </option>
+            {% endfor %}
+        </datalist>
+        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+            <input class="mdl-textfield__input" list="stations" type="text" id="fromStn" name="fromStn">
+            <label class="mdl-textfield__label" for="fromStn">Source Station</label>
+        </div>
+        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+            <input class="mdl-textfield__input" list="stations" type="text" id="toStn" name="toStn">
+            <label class="mdl-textfield__label" for="toStn">Destination Station</label>
+        </div>
+        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
+            <input class="mdl-textfield__input" type="date" id="startDate" name="startDate" value="2021-01-01">
+            <label class="mdl-textfield__label" for="startDate">Date</label>
+        </div>
+        <button type="submit"
+            class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
+            Submit
+        </button>
+    </form>
+    {% if search_results %}
+    <div style="overflow-x: auto;">
+    <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp" style="margin-left: auto; margin-right: auto;">
+        <tbody>
+            {% for pkt in search_results %}
+                {% if pkt.type == 1 %}
+                <tr>
+                <td> {{pkt.train_no}} </td>
+                <td style="text-align: center;">
+                    <span>{{pkt.src_station_code}}</span>
+                    <br>
+                    <span>{{pkt.src_date}}</span>
+                    <br>
+                    <span>{{pkt.src_dept_time}}</span>
+                </td>
+                <td style="text-align: center;">
+                    <span>{{pkt.train_no}} - {{pkt.train_name}}</span>
+                    <br>
+                    <span class="material-icons">arrow_right_alt</span>
+                    <br>
+                    <span> {{pkt.dest_distance - pkt.src_distance}} kms</span>
+                </td>
+                <td style="text-align: center;">
+                    <span>
+                        {{pkt.dest_station_code}}
+                    </span>
+                    <br>
+                    <span>
+                        {{pkt.dest_date}}
+                    </span>
+                    <br>
+                    <span>
+                        {{pkt.dest_arr_time}}
+                    </span>
+                </td>
+                </tr>
+                {% elif pkt.type == 2 %}
+                <tr>
+                <td style="text-align: center;" rowspan="2">
+                    <span> {{pkt.train1_no}} </span>
+                    <br>
+                    <span class="material-icons">add</span>
+                    <br>
+                    <span>{{pkt.train2_no}}</span>
+                </td>
+                <td style="text-align: center;">
+                    <span>{{pkt.train1_src_code}}</span>
+                    <br>
+                    <span>{{pkt.train1_src_date}}</span>
+                    <br>
+                    <span>{{pkt.train1_src_dept_time}}</span>
+                </td>
+                <td style="text-align: center;">
+                    <span>{{pkt.train1_no}} - {{pkt.train1_name}}</span>
+                    <br>
+                    <span class="material-icons">arrow_right_alt</span>
+                    <br>
+                    <span> {{pkt.train1_dest_distance - pkt.train1_src_distance}} kms</span>
+                </td>
+                <td style="text-align: center;">
+                    <span>
+                        {{pkt.train1_dest_code}}
+                    </span>
+                    <br>
+                    <span>
+                        {{pkt.train1_dest_date}}
+                    </span>
+                    <br>
+                    <span>
+                        {{pkt.train1_dest_arr_time}}
+                    </span>
+                </td>
+                </tr>
+                <!-- <td style="text-align: center;">
+                    <span class="material-icons">timer</span>
+                </td> -->
+
+                <tr>
+                <td style="text-align: center;">
+                    <span>{{pkt.train2_src_code}}</span>
+                    <br>
+                    <span>{{pkt.train2_src_date}}</span>
+                    <br>
+                    <span>{{pkt.train2_src_dept_time}}</span>
+                </td>
+                <td style="text-align: center;">
+                    <span>{{pkt.train2_no}} - {{pkt.train2_name}}</span>
+                    <br>
+                    <span class="material-icons">arrow_right_alt</span>
+                    <br>
+                    <span> {{pkt.train2_dest_distance - pkt.train2_src_distance}} kms</span>
+                </td>
+                <td style="text-align: center;">
+                    <span>
+                        {{pkt.train2_dest_code}}
+                    </span>
+                    <br>
+                    <span>
+                        {{pkt.train2_dest_date}}
+                    </span>
+                    <br>
+                    <span>
+                        {{pkt.train2_dest_arr_time}}
+                    </span>
+                </td>
+            </tr>
+                {% endif %}
+            {% endfor %}
+        </tbody>
+    </table>    
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
