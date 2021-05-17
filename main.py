@@ -10,7 +10,7 @@ ROWS_LIMIT = 100
 
 # SQL Queries
 SQL_STATIONS_LIST = """
-select distinct stops.station_code, stops.station_name
+select distinct stops.station_code||' - '|| stops.station_name
 from stops;
 """
 SQL_DIRECT_TRAINS = """
@@ -96,6 +96,9 @@ def homepage():
 
 @app.route("/search", methods=['GET','POST'])
 def search():
+    fromStn = ''
+    toStn = ''
+    startDate = datetime.datetime.now().isoformat()[:10]
     stations = None
     search_results = None
     with DBRC.db.engine.connect() as db_cnx:
@@ -103,35 +106,38 @@ def search():
         if flask.request.method == 'POST':
             fromStn = flask.request.form.get('fromStn')
             toStn = flask.request.form.get('toStn')
-            start_date = datetime.date.fromisoformat(flask.request.form.get('startDate'))
-            weekday = start_date.weekday()
+            startDate = datetime.date.fromisoformat(flask.request.form.get('startDate'))
+            weekday = startDate.weekday()
             search_results = []
-            for cur_db_row in db_cnx.execute(SQL_DIRECT_TRAINS, {'fromStn':fromStn, 'toStn':toStn, 'weekday':weekday}):
+            for cur_db_row in db_cnx.execute(SQL_DIRECT_TRAINS, {'fromStn':fromStn[:fromStn.index(' - ')], 'toStn':toStn[:toStn.index(' - ')], 'weekday':weekday}):
                 cur_row = { 'type' : 1 }
                 for idx in range(len(cur_db_row)):
                     cur_row[list(cur_db_row.keys())[idx]] = cur_db_row[idx]
-                cur_row['src_date'] = start_date.strftime('%d %b (%a)')
-                cur_row['dest_date'] = (start_date+datetime.timedelta(days=cur_db_row['dest_day_cnt']-cur_db_row['src_day_cnt'])).strftime('%d %b (%a)')
+                cur_row['src_date'] = startDate.strftime('%d %b (%a)')
+                cur_row['dest_date'] = (startDate+datetime.timedelta(days=cur_db_row['dest_day_cnt']-cur_db_row['src_day_cnt'])).strftime('%d %b (%a)')
                 search_results.append(cur_row)
             cnt = 0
-            for cur_db_row in db_cnx.execute(SQL_TWO_CONNECTING_TRAINS, {'fromStn':fromStn, 'toStn':toStn, 'weekday':weekday}):
+            for cur_db_row in db_cnx.execute(SQL_TWO_CONNECTING_TRAINS, {'fromStn':fromStn[:fromStn.index(' - ')], 'toStn':toStn[:toStn.index(' - ')], 'weekday':weekday}):
                 if cnt >= ROWS_LIMIT:
                     break
                 days_delta = cur_db_row['train1_dest_day_cnt'] - cur_db_row['train1_src_day_cnt'] + (cur_db_row['train1_dest_arr_time']>cur_db_row['train2_src_dept_time'])
-                train2_src_date = start_date+datetime.timedelta(days=days_delta)
+                train2_src_date = startDate+datetime.timedelta(days=days_delta)
                 if cur_db_row['train2_runson'] & (1<<train2_src_date.weekday()):
                     continue
                 cur_row = { 'type' : 2 }
                 for idx in range(len(cur_db_row)):
                     cur_row[list(cur_db_row.keys())[idx]] = cur_db_row[idx]
-                cur_row['train1_src_date'] = start_date.strftime('%d %b (%a)')
-                cur_row['train1_dest_date'] = (start_date+datetime.timedelta(days=cur_db_row['train1_dest_day_cnt']-cur_db_row['train1_src_day_cnt'])).strftime('%d %b (%a)')
+                cur_row['train1_src_date'] = startDate.strftime('%d %b (%a)')
+                cur_row['train1_dest_date'] = (startDate+datetime.timedelta(days=cur_db_row['train1_dest_day_cnt']-cur_db_row['train1_src_day_cnt'])).strftime('%d %b (%a)')
                 cur_row['train2_src_date'] = train2_src_date.strftime('%d %b (%a)')
                 cur_row['train2_dest_date'] = (train2_src_date+datetime.timedelta(days=cur_db_row['train2_dest_day_cnt']-cur_db_row['train2_src_day_cnt'])).strftime('%d %b (%a)')
                 search_results.append(cur_row)
                 cnt+=1
     return flask.render_template(
         'search.html', 
+        fromStn = fromStn,
+        toStn = toStn,
+        startDate = startDate,
         stations= stations,
         search_results= search_results
     )

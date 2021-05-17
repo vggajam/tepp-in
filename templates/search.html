@@ -14,20 +14,20 @@ Train Search
 <div class="page-content">
     <form action="{{ url_for('search') }}" method="POST" class="flex-row-wrap-space-evenly">
         <datalist id="stations">
-            {% for station_id, station_name in stations %}
-            <option value="{{station_id}}"> {{station_name}} </option>
+            {% for (station,) in stations %}
+            <option value="{{station}}">
             {% endfor %}
         </datalist>
         <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-            <input class="mdl-textfield__input" list="stations" type="text" id="fromStn" name="fromStn">
+            <input class="mdl-textfield__input" list="stations" type="text" id="fromStn" name="fromStn" value="{{fromStn}}">
             <label class="mdl-textfield__label" for="fromStn">Source Station</label>
         </div>
         <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-            <input class="mdl-textfield__input" list="stations" type="text" id="toStn" name="toStn">
+            <input class="mdl-textfield__input" list="stations" type="text" id="toStn" name="toStn" value="{{toStn}}">
             <label class="mdl-textfield__label" for="toStn">Destination Station</label>
         </div>
-        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-            <input class="mdl-textfield__input" type="date" id="startDate" name="startDate" value="2021-01-01">
+        <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label" style="width: fit-content;">
+            <input class="mdl-textfield__input" width="300" type="date" id="startDate" name="startDate" value="{{startDate}}">
             <label class="mdl-textfield__label" for="startDate">Date</label>
         </div>
         <button type="submit"
