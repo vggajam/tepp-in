@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
 
 {% block headTitle %}
-Train Search
+Train Enquiry
 {% endblock %}
 
 {% block title %}
-Train Search
+Train Enquiry Plus Plus
 {% endblock %}
 
 
@@ -16,10 +16,11 @@ Train Search
         <datalist id="stations">
             {% for (station,) in stations %}
             <option value="{{station}}">
-            {% endfor %}
+                {% endfor %}
         </datalist>
         <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
-            <input class="mdl-textfield__input" list="stations" type="text" id="fromStn" name="fromStn" value="{{fromStn}}">
+            <input class="mdl-textfield__input" list="stations" type="text" id="fromStn" name="fromStn"
+                value="{{fromStn}}">
             <label class="mdl-textfield__label" for="fromStn">Source Station</label>
         </div>
         <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label">
@@ -27,124 +28,155 @@ Train Search
             <label class="mdl-textfield__label" for="toStn">Destination Station</label>
         </div>
         <div class="mdl-textfield mdl-js-textfield mdl-textfield--floating-label" style="width: fit-content;">
-            <input class="mdl-textfield__input" width="300" type="date" id="startDate" name="startDate" value="{{startDate}}">
+            <input class="mdl-textfield__input" width="300" type="date" id="startDate" name="startDate"
+                value="{{startDate}}">
             <label class="mdl-textfield__label" for="startDate">Date</label>
         </div>
         <button type="submit"
             class="mdl-button mdl-js-button mdl-button--raised mdl-js-ripple-effect mdl-button--accent">
-            Submit
+            Search
         </button>
     </form>
     {% if search_results %}
     <div style="overflow-x: auto;">
-    <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp" style="margin-left: auto; margin-right: auto;">
-        <tbody>
-            {% for pkt in search_results %}
+        <table class="mdl-data-table mdl-js-data-table mdl-shadow--2dp" style="margin-left: auto; margin-right: auto;">
+            <tbody>
+                {% for pkt in search_results %}
                 {% if pkt.type == 1 %}
                 <tr>
-                <td> {{pkt.train_no}} </td>
-                <td style="text-align: center;">
-                    <span>{{pkt.src_station_code}}</span>
-                    <br>
-                    <span>{{pkt.src_date}}</span>
-                    <br>
-                    <span>{{pkt.src_dept_time}}</span>
-                </td>
-                <td style="text-align: center;">
-                    <span>{{pkt.train_no}} - {{pkt.train_name}}</span>
-                    <br>
-                    <span class="material-icons">arrow_right_alt</span>
-                    <br>
-                    <span> {{pkt.dest_distance - pkt.src_distance}} kms</span>
-                </td>
-                <td style="text-align: center;">
-                    <span>
-                        {{pkt.dest_station_code}}
-                    </span>
-                    <br>
-                    <span>
-                        {{pkt.dest_date}}
-                    </span>
-                    <br>
-                    <span>
-                        {{pkt.dest_arr_time}}
-                    </span>
-                </td>
+                    <td> {{pkt.train_no}} </td>
+                    <td style="text-align: center;">
+                        <div id="{{loop.index0}}-src">
+                            <span>{{pkt.src_station_code}}</span>
+                            <br>
+                            <span>{{pkt.src_date}}</span>
+                            <br>
+                            <span>{{pkt.src_dept_time}}</span>
+                        </div>
+                        <div class="mdl-tooltip" data-mdl-for="{{loop.index0}}-src">{{pkt.src_station_name}} </div>
+                    </td>
+                    <td style="text-align: center;">
+                        <span>{{pkt.train_no}} - {{pkt.train_name}}</span>
+                        <br>
+                        <span class="material-icons">arrow_right_alt</span>
+                        <br>
+                        <span> {{pkt.dest_distance - pkt.src_distance}} kms / {{pkt.total_time_str}}</span>
+                    </td>
+                    <td style="text-align: center;">
+                        <div id="{{loop.index0}}-dest">
+                            <span>
+                                {{pkt.dest_station_code}}
+                            </span>
+                            <br>
+                            <span>
+                                {{pkt.dest_date}}
+                            </span>
+                            <br>
+                            <span>
+                                {{pkt.dest_arr_time}}
+                            </span>
+
+                        </div>
+                        <div class="mdl-tooltip" data-mdl-for="{{loop.index0}}-dest">{{pkt.dest_station_name}} </div>
+                    </td>
+                    <td style="text-align: center;">
+                        <span>
+                            {{pkt.dest_distance - pkt.src_distance}} kms
+                        </span>
+                        <br>
+                        <span>
+                            {{pkt.total_time_str}}
+                        </span>
+                    </td>
                 </tr>
                 {% elif pkt.type == 2 %}
                 <tr>
-                <td style="text-align: center;" rowspan="2">
-                    <span> {{pkt.train1_no}} </span>
-                    <br>
-                    <span class="material-icons">add</span>
-                    <br>
-                    <span>{{pkt.train2_no}}</span>
-                </td>
-                <td style="text-align: center;">
-                    <span>{{pkt.train1_src_code}}</span>
-                    <br>
-                    <span>{{pkt.train1_src_date}}</span>
-                    <br>
-                    <span>{{pkt.train1_src_dept_time}}</span>
-                </td>
-                <td style="text-align: center;">
-                    <span>{{pkt.train1_no}} - {{pkt.train1_name}}</span>
-                    <br>
-                    <span class="material-icons">arrow_right_alt</span>
-                    <br>
-                    <span> {{pkt.train1_dest_distance - pkt.train1_src_distance}} kms</span>
-                </td>
-                <td style="text-align: center;">
-                    <span>
-                        {{pkt.train1_dest_code}}
-                    </span>
-                    <br>
-                    <span>
-                        {{pkt.train1_dest_date}}
-                    </span>
-                    <br>
-                    <span>
-                        {{pkt.train1_dest_arr_time}}
-                    </span>
-                </td>
-                </tr>
-                <!-- <td style="text-align: center;">
-                    <span class="material-icons">timer</span>
-                </td> -->
+                    <td style="text-align: center;" rowspan="2">
+                        <span> {{pkt.train1_no}} </span>
+                        <br>
+                        <span class="material-icons">add</span>
+                        <br>
+                        <span>{{pkt.train2_no}}</span>
+                    </td>
+                    <td style="text-align: center;">
+                        <div id="{{loop.index0}}-t1-src">
+                            <span>{{pkt.train1_src_code}}</span>
+                            <br>
+                            <span>{{pkt.train1_src_date}}</span>
+                            <br>
+                            <span>{{pkt.train1_src_dept_time}}</span>
 
+                        </div>
+                        <div class="mdl-tooltip" data-mdl-for="{{loop.index0}}-t1-src">{{pkt.train1_src_name}} </div>
+                    </td>
+                    <td style="text-align: center;">
+                        <span>{{pkt.train1_no}} - {{pkt.train1_name}}</span>
+                        <br>
+                        <span class="material-icons">arrow_right_alt</span>
+                        <br>
+                        <span> {{pkt.train1_dest_distance - pkt.train1_src_distance}} kms / {{pkt.train1_time_str}}</span>
+                    </td>
+                    <td style="text-align: center;">
+                        <div id="{{loop.index0}}-t1-dest">
+                            <span>
+                                {{pkt.train1_dest_code}}
+                            </span>
+                            <br>
+                            <span>
+                                {{pkt.train1_dest_date}}
+                            </span>
+                            <br>
+                            <span>
+                                {{pkt.train1_dest_arr_time}}
+                            </span>
+                        </div>
+                        <div class="mdl-tooltip" data-mdl-for="{{loop.index0}}-t1-dest">{{pkt.train1_dest_name}} </div>
+                    </td>
+                    <td rowspan="2" style="text-align: center;">
+                        <span> {{pkt.train1_dest_distance - pkt.train1_src_distance + pkt.train2_dest_distance - pkt.train2_src_distance }} kms </span>
+                        <br>
+                        <span>{{pkt.total_time_str}}</span>
+                    </td>
+                </tr>
                 <tr>
-                <td style="text-align: center;">
-                    <span>{{pkt.train2_src_code}}</span>
-                    <br>
-                    <span>{{pkt.train2_src_date}}</span>
-                    <br>
-                    <span>{{pkt.train2_src_dept_time}}</span>
-                </td>
-                <td style="text-align: center;">
-                    <span>{{pkt.train2_no}} - {{pkt.train2_name}}</span>
-                    <br>
-                    <span class="material-icons">arrow_right_alt</span>
-                    <br>
-                    <span> {{pkt.train2_dest_distance - pkt.train2_src_distance}} kms</span>
-                </td>
-                <td style="text-align: center;">
-                    <span>
-                        {{pkt.train2_dest_code}}
-                    </span>
-                    <br>
-                    <span>
-                        {{pkt.train2_dest_date}}
-                    </span>
-                    <br>
-                    <span>
-                        {{pkt.train2_dest_arr_time}}
-                    </span>
-                </td>
-            </tr>
+                    <td style="text-align: center;">
+                        <div id="{{loop.index0}}-t2-src">
+                            <span>{{pkt.train2_src_code}}</span>
+                            <br>
+                            <span>{{pkt.train2_src_date}}</span>
+                            <br>
+                            <span>{{pkt.train2_src_dept_time}}</span>
+                        </div>
+                        <div class="mdl-tooltip" data-mdl-for="{{loop.index0}}-t2-src">{{pkt.train2_src_name}} </div>
+                    </td>
+                    <td style="text-align: center;">
+                        <span>{{pkt.train2_no}} - {{pkt.train2_name}}</span>
+                        <br>
+                        <span class="material-icons">arrow_right_alt</span>
+                        <br>
+                        <span> {{pkt.train2_dest_distance - pkt.train2_src_distance}} kms / {{pkt.train2_time_str}} </span>
+                    </td>
+                    <td style="text-align: center;">
+                        <div id="{{loop.index0}}-t2-dest">
+                            <span>
+                                {{pkt.train2_dest_code}}
+                            </span>
+                            <br>
+                            <span>
+                                {{pkt.train2_dest_date}}
+                            </span>
+                            <br>
+                            <span>
+                                {{pkt.train2_dest_arr_time}}
+                            </span>
+                        </div>
+                        <div class="mdl-tooltip" data-mdl-for="{{loop.index0}}-t2-dest">{{pkt.train2_dest_name}} </div>
+                    </td>
+                </tr>
                 {% endif %}
-            {% endfor %}
-        </tbody>
-    </table>    
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
     {% endif %}
 </div>

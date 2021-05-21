@@ -8,6 +8,10 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='material.min.css') }}">
     <script defer src="{{ url_for('static', filename='material.min.js') }}"></script>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', filename='apple-touch-icon.png')}}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png')}}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png')}}">
+    <link rel="manifest" href="{{ url_for('static', filename='site.webmanifest')}}">
     <style>
         .flex-row-wrap-space-evenly {
             display: flex;
@@ -35,6 +39,10 @@
                 <div class="mdl-layout-spacer"></div>
                 <span class="material-icons">
                     tips_and_updates
+                </span>
+                <span class="material-icons" style="margin-left: 10px;">
+                        engineering
+                    
                 </span>
             </div>
         </header>

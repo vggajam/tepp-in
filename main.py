@@ -6,7 +6,8 @@ app = flask.Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///main.db'
 DBRC.db.init_app(app)
 
-ROWS_LIMIT = 100
+MAX_EACH_TYPE_LIMIT = 100
+MAX_RESULTS = 100
 
 # SQL Queries
 SQL_STATIONS_LIST = """
@@ -19,11 +20,13 @@ train.Name as train_name,
 src.route_no as route_no,
 src.serial_no as src_serial_no,
 src.station_code as src_station_code,
+src.station_name as src_station_name,
 src.distance as src_distance,
 src.dept_day_cnt as src_day_cnt,
 src.dept_time as src_dept_time,
 dest.serial_no as dest_serial_no,
 dest.station_code as dest_station_code,
+dest.station_name as dest_station_name,
 dest.distance as dest_distance,
 dest.arr_day_cnt as dest_day_cnt,
 dest.arr_time as dest_arr_time,
@@ -90,11 +93,13 @@ and train1.RunsOn & (1 << ((21+:weekday -(train1_src.dept_day_cnt-1))%7))  > 0
 order by travel_distance
 ;"""
 
+str_time_delta = lambda time_delta: (str(time_delta).replace(':', ' hrs ', 1)[:-3]+' mins').replace('00 mins', '')
+
 @app.route("/")
 def homepage():
     return flask.redirect(flask.url_for('search'))
 
-@app.route("/search", methods=['GET','POST'])
+@app.route("/enquiry", methods=['GET','POST'])
 def search():
     fromStn = ''
     toStn = ''
@@ -115,24 +120,36 @@ def search():
                     cur_row[list(cur_db_row.keys())[idx]] = cur_db_row[idx]
                 cur_row['src_date'] = startDate.strftime('%d %b (%a)')
                 cur_row['dest_date'] = (startDate+datetime.timedelta(days=cur_db_row['dest_day_cnt']-cur_db_row['src_day_cnt'])).strftime('%d %b (%a)')
+                cur_row['total_time'] = ( datetime.datetime.strptime(f"{cur_db_row['dest_day_cnt']} {cur_db_row['dest_arr_time']}", "%d %H:%M") - datetime.datetime.strptime(f"{cur_db_row['src_day_cnt']} {cur_db_row['src_dept_time']}", "%d %H:%M") )
+                cur_row['total_time_str'] = str_time_delta(cur_row['total_time'])
+                cur_row['total_time_in_seconds'] = cur_row['total_time'].total_seconds()
                 search_results.append(cur_row)
             cnt = 0
             for cur_db_row in db_cnx.execute(SQL_TWO_CONNECTING_TRAINS, {'fromStn':fromStn[:fromStn.index(' - ')], 'toStn':toStn[:toStn.index(' - ')], 'weekday':weekday}):
-                if cnt >= ROWS_LIMIT:
+                if cnt >= MAX_EACH_TYPE_LIMIT or len(search_results) > MAX_RESULTS: 
                     break
                 days_delta = cur_db_row['train1_dest_day_cnt'] - cur_db_row['train1_src_day_cnt'] + (cur_db_row['train1_dest_arr_time']>cur_db_row['train2_src_dept_time'])
                 train2_src_date = startDate+datetime.timedelta(days=days_delta)
-                if cur_db_row['train2_runson'] & (1<<train2_src_date.weekday()):
+                if not (cur_db_row['train2_runson'] & (1<<train2_src_date.weekday())):
                     continue
                 cur_row = { 'type' : 2 }
                 for idx in range(len(cur_db_row)):
                     cur_row[list(cur_db_row.keys())[idx]] = cur_db_row[idx]
                 cur_row['train1_src_date'] = startDate.strftime('%d %b (%a)')
                 cur_row['train1_dest_date'] = (startDate+datetime.timedelta(days=cur_db_row['train1_dest_day_cnt']-cur_db_row['train1_src_day_cnt'])).strftime('%d %b (%a)')
+                cur_row['train1_time'] = ( datetime.datetime.strptime(f"{cur_db_row['train1_dest_day_cnt']} {cur_db_row['train1_dest_arr_time']}", "%d %H:%M") - datetime.datetime.strptime(f"{cur_db_row['train1_src_day_cnt']} {cur_db_row['train1_src_dept_time']}", "%d %H:%M") )
+                cur_row['train1_time_str'] = str_time_delta(cur_row['train1_time'])
                 cur_row['train2_src_date'] = train2_src_date.strftime('%d %b (%a)')
                 cur_row['train2_dest_date'] = (train2_src_date+datetime.timedelta(days=cur_db_row['train2_dest_day_cnt']-cur_db_row['train2_src_day_cnt'])).strftime('%d %b (%a)')
+                cur_row['train2_time'] = ( datetime.datetime.strptime(f"{cur_db_row['train2_dest_day_cnt']} {cur_db_row['train2_dest_arr_time']}", "%d %H:%M") - datetime.datetime.strptime(f"{cur_db_row['train2_src_day_cnt']} {cur_db_row['train2_src_dept_time']}", "%d %H:%M") ) 
+                cur_row['train2_time_str'] = str_time_delta(cur_row['train2_time'])
+                cur_row['wait_time'] = ( datetime.datetime.strptime(f"{1+int(cur_db_row['train2_src_dept_time'] < cur_db_row['train1_dest_arr_time'])} {cur_db_row['train2_src_dept_time']}", "%d %H:%M") - datetime.datetime.strptime(f"1 {cur_db_row['train1_dest_arr_time']}", "%d %H:%M") )
+                cur_row['total_time'] = cur_row['train1_time'] + cur_row['train2_time'] + cur_row['wait_time']
+                cur_row['total_time_str'] = str_time_delta(cur_row['total_time'])
+                cur_row['total_time_in_seconds'] = cur_row['total_time'].total_seconds()
                 search_results.append(cur_row)
                 cnt+=1
+            search_results = sorted(search_results, key= lambda pkt: pkt['total_time_in_seconds'])
     return flask.render_template(
         'search.html', 
         fromStn = fromStn,
