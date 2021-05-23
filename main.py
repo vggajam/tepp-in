@@ -1,6 +1,7 @@
 import flask
 import DBRC
 import datetime
+from SQL_queries import *
 
 app = flask.Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///main.db'
@@ -8,90 +9,6 @@ DBRC.db.init_app(app)
 
 MAX_EACH_TYPE_LIMIT = 100
 MAX_RESULTS = 100
-
-# SQL Queries
-SQL_STATIONS_LIST = """
-select distinct stops.station_code||' - '|| stops.station_name
-from stops;
-"""
-SQL_DIRECT_TRAINS = """
-select train.ID as train_no,
-train.Name as train_name,
-src.route_no as route_no,
-src.serial_no as src_serial_no,
-src.station_code as src_station_code,
-src.station_name as src_station_name,
-src.distance as src_distance,
-src.dept_day_cnt as src_day_cnt,
-src.dept_time as src_dept_time,
-dest.serial_no as dest_serial_no,
-dest.station_code as dest_station_code,
-dest.station_name as dest_station_name,
-dest.distance as dest_distance,
-dest.arr_day_cnt as dest_day_cnt,
-dest.arr_time as dest_arr_time,
-dest.distance - src.distance as travel_distance
-from stops as src 
-JOIN stops as dest 
-on src.train_no = dest.train_no
-and src.route_no = dest.route_no
-and src.serial_no < dest.serial_no
-JOIN trains as train
-on src.train_no = train.ID
-WHERE src.station_code = :fromStn
-and dest.station_code = :toStn
-and train.RunsOn & (1 << ((21+:weekday-(src.dept_day_cnt-1))%7))  > 0;
-"""
-
-SQL_TWO_CONNECTING_TRAINS = """
-select train1.ID as train1_no,
-train1.Name as train1_name,
-train1.RunsOn as train1_runson,
-train1_src.station_code as train1_src_code,
-train1_src.station_name as train1_src_name,
-train1_src.dept_day_cnt as train1_src_day_cnt,
-train1_src.distance as train1_src_distance,
-train1_src.dept_time as train1_src_dept_time,
-train1_dest.station_code as train1_dest_code,
-train1_dest.station_name as train1_dest_name,
-train1_dest.arr_day_cnt as train1_dest_day_cnt,
-train1_dest.distance as train1_dest_distance,
-train1_dest.arr_time as train1_dest_arr_time,
-train2.ID as train2_no,
-train2.Name as train2_name,
-train2.RunsOn as train2_runson,
-train2_src.station_code as train2_src_code,
-train2_src.station_name as train2_src_name,
-train2_src.dept_day_cnt as train2_src_day_cnt,
-train2_src.distance as train2_src_distance,
-train2_src.dept_time as train2_src_dept_time,
-train2_dest.station_code as train2_dest_code,
-train2_dest.station_name as train2_dest_name,
-train2_dest.arr_day_cnt as train2_dest_day_cnt,
-train2_dest.distance as train2_dest_distance,
-train2_dest.arr_time as train2_dest_arr_time,
-(train2_dest.distance - train2_src.distance + train1_dest.distance - train1_src.distance) as travel_distance
-from stops as train1_src
-JOIN stops as train1_dest
-on train1_src.train_no = train1_dest.train_no
-and train1_src.route_no = train1_dest.route_no
-and train1_src.serial_no < train1_dest.serial_no
-JOIN trains as train1
-on train1_src.train_no = train1.ID
-JOIN stops as train2_src
-on train1_dest.station_code = train2_src.station_code
-JOIN stops as train2_dest
-on train2_src.train_no = train2_dest.train_no
-and train2_src.route_no = train2_dest.route_no
-and train2_src.serial_no < train2_dest.serial_no
-JOIN trains as train2
-on train2_src.train_no = train2.ID
-WHERE train1.ID != train2.ID
-and train1_src.station_code = :fromStn
-and train2_dest.station_code = :toStn
-and train1.RunsOn & (1 << ((21+:weekday -(train1_src.dept_day_cnt-1))%7))  > 0
-order by travel_distance
-;"""
 
 str_time_delta = lambda time_delta: (str(time_delta).replace(':', ' hrs ', 1)[:-3]+' mins').replace('00 mins', '')
 
@@ -159,11 +76,34 @@ def search():
         search_results= search_results
     )
 
-@app.route("/funfacts", methods=['GET'])
-def funfacts():
-    for x in DBRC.Train.query.all():
-        print(x)
-    return ''
+@app.route("/facts", methods=['GET'])
+def facts():
+    FACTS_MAP = {
+        '5': {
+            'QUEST' : 'Top 10 stations with most trains stop by',
+            'SQL_QRY':SQL_STATION_WITH_MOST_TRAINS
+        },
+        '1': {
+            'QUEST': 'Top 10 trains with most stops',
+            'SQL_QRY': SQL_TRAIN_WITH_MOST_STOPS
+        },
+        '4': {
+            'QUEST' : 'Top 10 trains that travel most distance in its trip',
+            'SQL_QRY':SQL_TRAIN_WITH_MAX_DISTANCE
+        },
+        '2': {
+            'QUEST': 'Top 10 trains with least stops',
+            'SQL_QRY': SQL_TRAIN_WITH_LEAST_STOPS
+        },
+        '3': {
+            'QUEST' : 'Top 10 trains that travel least in its trip',
+            'SQL_QRY': SQL_TRAIN_WITH_LEAST_DISTANCE
+        },
+    }
+    with DBRC.db.engine.connect() as db_cnx:
+        for qid, pkt in FACTS_MAP.items():
+            FACTS_MAP[qid]['ANS'] = [ cur_db_row['statement'] for cur_db_row in db_cnx.execute(pkt['SQL_QRY'], {'limit':10}) ]
+    return flask.render_template('facts.html', goback=1,facts=FACTS_MAP)
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=80, debug=1)

@@ -12,6 +12,9 @@
     <link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', filename='favicon-32x32.png')}}">
     <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', filename='favicon-16x16.png')}}">
     <link rel="manifest" href="{{ url_for('static', filename='site.webmanifest')}}">
+    <!-- Add icon library -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
     <style>
         .flex-row-wrap-space-evenly {
             display: flex;
@@ -26,6 +29,20 @@
             justify-content: space-evenly;
             align-items: center;
         }
+
+        .profile-card.mdl-card {
+            width: 512px;
+        }
+
+        .profile-card>.mdl-card__title {
+            color: #fff;
+            height: 300px;
+            background: url('{{url_for("static", filename="vgg.png")}}') center / cover;
+        }
+
+        .profile-card>.mdl-card__menu {
+            color: #fff;
+        }
     </style>
 </head>
 
@@ -33,17 +50,70 @@
     <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header">
         <header class="mdl-layout__header">
             <div class="mdl-layout__header-row" style="padding-left: 40px;">
+                {% if goback %}
+                <a href="/" style="color: white; margin-right: 10px;">
+                    <span class="material-icons">
+                        arrow_back
+                    </span>
+                </a>
+                {% endif %}
                 <!-- Title -->
                 <span class="mdl-layout-title">{% block title %} {% endblock %}</span>
                 <!-- Add spacer, to align navigation to the right -->
                 <div class="mdl-layout-spacer"></div>
-                <span class="material-icons">
-                    tips_and_updates
-                </span>
-                <span class="material-icons" style="margin-left: 10px;">
-                        engineering
-                    
-                </span>
+                <a href="{{url_for('facts')}}" style="color: white; margin-right: 10px;">
+                    <span class="material-icons">
+                        tips_and_updates
+                    </span>
+                </a>
+                <button id="show-dialog" class="mdl-button mdl-js-button mdl-button--icon">
+                    <i class="material-icons">engineering</i>
+                </button>
+                <dialog class=" mdl-dialog profile-card">
+                    <div class="mdl-card__title">
+                        <h2 class="mdl-card__title-text">Venu Gopal Gajam</h2>
+                    </div>
+                    <div class="mdl-card__actions mdl-card--border">
+                        <button class="mdl-button mdl-js-button mdl-button--icon">
+                            <a href="https://github.com/venugopalgajam" target="_blank" style="color: black; text-decoration: none;"
+                                class=" fa fa-github">
+
+                            </a>
+                        </button>
+                        <button class="mdl-button mdl-js-button mdl-button--icon" style="border-radius: 20%;">
+                            <a href="https://www.linkedin.com/in/venugopalgajam/" target="_blank"
+                                style="color: black; text-decoration: none;" class=" fa fa-linkedin">
+
+                            </a>
+                        </button>
+                        <button class="mdl-button mdl-js-button mdl-button--icon">
+                            <a href="https://twitter.com/venugopalgajam" target="_blank"
+                                style="color: black; text-decoration: none;" class=" fa fa-twitter">
+                            </a>
+                        </button>
+                    </div>
+                    <div class="mdl-card__menu">
+                        <button style="color: black;"
+                            class="mdl-button mdl-button--icon mdl-js-button mdl-js-ripple-effect close">
+                            <span class="material-icons">
+                                cancel
+                            </span>
+                        </button>
+                    </div>
+                </dialog>
+                <script>
+                    var dialog = document.querySelector('dialog');
+                    var showDialogButton = document.querySelector('#show-dialog');
+                    if (!dialog.showModal) {
+                        dialogPolyfill.registerDialog(dialog);
+                    }
+                    showDialogButton.addEventListener('click', function () {
+                        dialog.showModal();
+                    });
+                    dialog.querySelector('.close').addEventListener('click', function () {
+                        dialog.close();
+                    });
+                </script>
             </div>
         </header>
         <main class="mdl-layout__content">

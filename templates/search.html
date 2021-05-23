@@ -1,18 +1,18 @@
 {% extends 'base.html' %}
 
 {% block headTitle %}
-Train Enquiry
+Train Enquiry + +
 {% endblock %}
 
 {% block title %}
-Train Enquiry Plus Plus
+Train Enquiry + +
 {% endblock %}
 
 
 {% block content %}
 
-<div class="page-content">
-    <form action="{{ url_for('search') }}" method="POST" class="flex-row-wrap-space-evenly">
+<div class="page-content" style="margin: 10px">
+    <form action="{{ url_for('search') }}" method="POST" style="margin: 2px;"  class=" {% if search_results %}  flex-row-wrap-space-evenly {% else %} flex-col-wrap-space-evenly {% endif %}">
         <datalist id="stations">
             {% for (station,) in stations %}
             <option value="{{station}}">
