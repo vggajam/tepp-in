@@ -1,16 +1,53 @@
-import flask
-import DBRC
 import datetime
+
+import flask
+from flask_sqlalchemy import SQLAlchemy
+
 from SQL_queries import *
 
 app = flask.Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///main.db'
-DBRC.db.init_app(app)
 
 MAX_EACH_TYPE_LIMIT = 100
 MAX_RESULTS = 100
 
 str_time_delta = lambda time_delta: (str(time_delta).replace(':', ' hrs ', 1)[:-3]+' mins').replace('00 mins', '')
+
+db = SQLAlchemy(app)
+
+class Train(db.Model):
+    __tablename__ = 'trains'
+    
+    ID = db.Column(db.String, primary_key=1)
+    Name = db.Column(db.String)
+    RunsOn = db.Column(db.Integer, nullable=0)
+
+    def __repr__(self):
+        run_days = []
+        weekdays = ('Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun')
+        for idx in range(len(weekdays)):
+            if self.RunsOn & (1 <<idx):
+                run_days.append(weekdays[idx])
+        run_days_str = ', '.join(run_days)
+        return f'<Train (ID="{self.ID}", Name="{self.Name}", RunsOn="{run_days_str}")>'
+
+class Stop(db.Model):
+    __tablename__ = 'stops'
+
+    train_no = db.Column(db.String, db.ForeignKey('trains.ID'), primary_key=1)
+    route_no = db.Column(db.Integer, primary_key=1)
+    serial_no = db.Column(db.Integer, primary_key=1)
+    station_code = db.Column(db.String)
+    station_name = db.Column(db.String)
+    distance = db.Column(db.Integer)
+    arr_day_cnt = db.Column(db.Integer)	
+    arr_time = db.Column(db.String)
+    dept_day_cnt = db.Column(db.Integer)
+    dept_time = db.Column(db.String)
+    halt_time =	db.Column(db.String)
+
+    def __repr__(self):
+        return f'<Stop (train_no="{self.train_no}, route_no="{self.route_no}", serial_no="{self.serial_no}", station_code="{self.station_code}") >'
 
 @app.route("/")
 def homepage():
@@ -23,7 +60,7 @@ def search():
     startDate = datetime.datetime.now().isoformat()[:10]
     stations = None
     search_results = None
-    with DBRC.db.engine.connect() as db_cnx:
+    with db.engine.connect() as db_cnx:
         stations = db_cnx.execute(SQL_STATIONS_LIST).all()
         if flask.request.method == 'POST':
             fromStn = flask.request.form.get('fromStn')
@@ -100,7 +137,7 @@ def facts():
             'SQL_QRY': SQL_TRAIN_WITH_LEAST_DISTANCE
         },
     }
-    with DBRC.db.engine.connect() as db_cnx:
+    with db.engine.connect() as db_cnx:
         for qid, pkt in FACTS_MAP.items():
             FACTS_MAP[qid]['ANS'] = [ cur_db_row['statement'] for cur_db_row in db_cnx.execute(pkt['SQL_QRY'], {'limit':10}) ]
     return flask.render_template('facts.html', goback=1,facts=FACTS_MAP)

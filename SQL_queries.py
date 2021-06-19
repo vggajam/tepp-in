@@ -30,7 +30,6 @@ WHERE src.station_code = :fromStn
 and dest.station_code = :toStn
 and train.RunsOn & (1 << ((21+:weekday-(src.dept_day_cnt-1))%7))  > 0;
 """
-
 SQL_TWO_CONNECTING_TRAINS = """
 select train1.ID as train1_no,
 train1.Name as train1_name,
@@ -83,7 +82,6 @@ order by travel_distance
 
 
 # facts
-
 SQL_TRAIN_WITH_MOST_STOPS = """
 SELECT trains.Name||' - '||stops.train_no||' ('||(count(DISTINCT stops.station_code))||' stops)' as statement,
 trains.Name,
